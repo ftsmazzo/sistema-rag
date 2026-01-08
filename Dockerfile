@@ -10,7 +10,7 @@ COPY patches ./patches
 
 # Install pnpm and dependencies
 RUN corepack enable && corepack prepare pnpm@latest --activate
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --no-frozen-lockfile
 
 # Copy source code
 COPY . .
