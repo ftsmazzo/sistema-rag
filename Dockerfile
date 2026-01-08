@@ -56,11 +56,12 @@ RUN apt-get update && apt-get install -y \
     postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
-# Install production dependencies only
+# Install production dependencies only (including drizzle-kit for migrations)
 COPY package.json pnpm-lock.yaml ./
 COPY patches ./patches
 RUN corepack enable && corepack prepare pnpm@latest --activate && \
     pnpm install --no-frozen-lockfile --prod && \
+    pnpm add -g drizzle-kit@^0.31.4 && \
     pnpm store prune
 
 # Copy built assets from builders

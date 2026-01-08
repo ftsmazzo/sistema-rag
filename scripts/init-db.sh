@@ -35,8 +35,8 @@ psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -c "CREATE EXTENSIO
 # Run migrations
 echo "🚀 Executando migrações do banco de dados..."
 cd /app
-# Use npx directly to avoid corepack cache issues
-npx drizzle-kit generate && npx drizzle-kit migrate
+# Use drizzle-kit directly (installed globally in Dockerfile)
+drizzle-kit generate && drizzle-kit migrate
 
 echo "✅ Migrações concluídas com sucesso!"
 
