@@ -77,9 +77,11 @@ COPY drizzle.config.ts ./drizzle.config.ts
 # Create non-root user and make init script executable
 RUN groupadd -g 1001 nodejs && \
     useradd -r -u 1001 -g nodejs -m -d /home/nodejs nodejs && \
-    mkdir -p /home/nodejs/.cache/node/corepack && \
+    mkdir -p /home/nodejs/.cache/node/corepack/v1 && \
     chmod +x /app/scripts/init-db.sh && \
-    chown -R nodejs:nodejs /app /home/nodejs
+    chown -R nodejs:nodejs /app /home/nodejs && \
+    chmod -R 755 /home/nodejs/.cache && \
+    chmod -R 777 /home/nodejs/.cache/node
 
 USER nodejs
 

@@ -35,7 +35,8 @@ psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -c "CREATE EXTENSIO
 # Run migrations
 echo "🚀 Executando migrações do banco de dados..."
 cd /app
-pnpm db:push
+# Use npx directly to avoid corepack cache issues
+npx drizzle-kit generate && npx drizzle-kit migrate
 
 echo "✅ Migrações concluídas com sucesso!"
 
