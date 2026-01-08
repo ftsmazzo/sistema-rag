@@ -5,9 +5,12 @@ import { nanoid } from "nanoid";
 import path from "path";
 
 export async function setupVite(app: Express, server: Server) {
-  // Dynamic import to avoid bundling vite in production
-  const { createServer: createViteServer } = await import("vite");
-  const viteConfig = await import("../../vite.config");
+  // Dynamic import using string literal to avoid bundling vite in production
+  // Using Function constructor to prevent esbuild from analyzing the import
+  const viteModule = "vite";
+  const configModule = "../../vite.config";
+  const { createServer: createViteServer } = await import(viteModule);
+  const viteConfig = await import(configModule);
   const serverOptions = {
     middlewareMode: true,
     hmr: { server },
