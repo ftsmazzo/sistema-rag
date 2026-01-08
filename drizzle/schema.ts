@@ -2,17 +2,20 @@ import { pgTable, serial, text, timestamp, varchar, index, integer, boolean, pgE
 import { sql } from "drizzle-orm";
 
 // Define vector type for pgvector
-const vector = customType<{ data: number[]; driverData: string }>({
-  dataType() {
-    return "vector(1536)";
-  },
-  toDriver(value: number[]): string {
-    return `[${value.join(",")}]`;
-  },
-  fromDriver(value: string): number[] {
-    return JSON.parse(value);
-  },
-});
+function vector(name: string, options?: { dimensions?: number }) {
+  const dimensions = options?.dimensions || 1536;
+  return customType<{ data: number[]; driverData: string }>({
+    dataType() {
+      return `vector(${dimensions})`;
+    },
+    toDriver(value: number[]): string {
+      return `[${value.join(",")}]`;
+    },
+    fromDriver(value: string): number[] {
+      return JSON.parse(value);
+    },
+  })(name);
+}
 
 /**
  * Organizations table for multi-tenant support
