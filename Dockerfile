@@ -64,7 +64,7 @@ RUN corepack enable && corepack prepare pnpm@latest --activate && \
     pnpm store prune
 
 # Copy built assets from builders
-COPY --from=frontend-builder /app/dist/client ./dist/client
+COPY --from=frontend-builder /app/dist/public ./dist/public
 COPY --from=backend-builder /app/dist ./dist
 
 # Copy necessary files
