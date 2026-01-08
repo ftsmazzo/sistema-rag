@@ -29,7 +29,7 @@ COPY patches ./patches
 
 # Install pnpm and dependencies
 RUN corepack enable && corepack prepare pnpm@latest --activate
-RUN pnpm install --frozen-lockfile --prod=false
+RUN pnpm install --no-frozen-lockfile --prod=false
 
 # Copy source code
 COPY . .
@@ -60,7 +60,7 @@ RUN apt-get update && apt-get install -y \
 COPY package.json pnpm-lock.yaml ./
 COPY patches ./patches
 RUN corepack enable && corepack prepare pnpm@latest --activate && \
-    pnpm install --frozen-lockfile --prod && \
+    pnpm install --no-frozen-lockfile --prod && \
     pnpm store prune
 
 # Copy built assets from builders
