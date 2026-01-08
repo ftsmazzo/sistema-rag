@@ -22,8 +22,9 @@ FROM node:22-alpine AS backend-builder
 
 WORKDIR /app
 
-# Copy package files
+# Copy package files and patches (needed for pnpm install)
 COPY package.json pnpm-lock.yaml ./
+COPY patches ./patches
 
 # Install pnpm and dependencies
 RUN corepack enable && corepack prepare pnpm@latest --activate
@@ -56,6 +57,7 @@ RUN apt-get update && apt-get install -y \
 
 # Install production dependencies only
 COPY package.json pnpm-lock.yaml ./
+COPY patches ./patches
 RUN corepack enable && corepack prepare pnpm@latest --activate && \
     pnpm install --frozen-lockfile --prod && \
     pnpm store prune
