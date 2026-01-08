@@ -75,8 +75,8 @@ COPY scripts/init-db.sh ./scripts/init-db.sh
 COPY drizzle.config.ts ./drizzle.config.ts
 
 # Create non-root user and make init script executable
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodejs -u 1001 && \
+RUN groupadd -g 1001 nodejs && \
+    useradd -r -u 1001 -g nodejs nodejs && \
     chmod +x /app/scripts/init-db.sh && \
     chown -R nodejs:nodejs /app
 
