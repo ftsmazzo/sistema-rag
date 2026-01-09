@@ -11,7 +11,7 @@ export class RAG implements INodeType {
     name: 'rag',
     icon: 'file:nodes/RAG/rag.svg',
     iconColor: '#6366F1',
-    group: ['transform'],
+    group: ['transform', 'ai'],
     version: 1,
     subtitle: '={{$parameter["operation"]}}',
     description: 'Query your RAG Knowledge Base with semantic search',
