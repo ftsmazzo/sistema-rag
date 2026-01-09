@@ -260,13 +260,10 @@ export async function createChunk(chunk: InsertDocumentChunk): Promise<DocumentC
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  const result = await db.insert(documentChunks).values(chunk);
-  const insertedId = Number(result[0].insertId);
+  const result = await db.insert(documentChunks).values(chunk).returning();
+  if (!result[0]) throw new Error("Failed to insert chunk");
   
-  const inserted = await db.select().from(documentChunks).where(eq(documentChunks.id, insertedId)).limit(1);
-  if (!inserted[0]) throw new Error("Failed to retrieve inserted chunk");
-  
-  return inserted[0];
+  return result[0];
 }
 
 export async function getDocumentChunks(documentId: number, userId: number): Promise<DocumentChunk[]> {
@@ -283,13 +280,10 @@ export async function createEmbedding(emb: InsertEmbedding): Promise<Embedding> 
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  const result = await db.insert(embeddings).values(emb);
-  const insertedId = Number(result[0].insertId);
+  const result = await db.insert(embeddings).values(emb).returning();
+  if (!result[0]) throw new Error("Failed to insert embedding");
   
-  const inserted = await db.select().from(embeddings).where(eq(embeddings.id, insertedId)).limit(1);
-  if (!inserted[0]) throw new Error("Failed to retrieve inserted embedding");
-  
-  return inserted[0];
+  return result[0];
 }
 
 export async function getAllUserEmbeddings(userId: number, organizationId?: number): Promise<Embedding[]> {
