@@ -4,15 +4,16 @@ Node customizado do n8n para integração simplificada com o sistema RAG Knowled
 
 ## 🚀 Instalação
 
-### Opção 1: Instalação via npm (recomendado)
+### ⭐ Instalação via npm (RECOMENDADO - Mais Fácil!)
 
 ```bash
+cd ~/.n8n/custom
 npm install @rag-system/n8n-nodes-rag
 ```
 
-Depois, reinicie o n8n.
+Depois, **reinicie o n8n**. Pronto! ✅
 
-### Opção 2: Instalação manual
+### Opção 2: Instalação manual (se npm não funcionar)
 
 1. Clone este repositório
 2. Execute `npm install` na pasta `n8n-node-rag`
