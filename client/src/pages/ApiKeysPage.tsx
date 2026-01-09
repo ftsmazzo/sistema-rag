@@ -300,7 +300,7 @@ export default function ApiKeysPage() {
                       <Badge variant="outline">{key.rateLimit} req/min</Badge>
                     </TableCell>
                     <TableCell>
-                      {key.isActive === 1 ? (
+                      {(key.isActive === true || key.isActive === 1) ? (
                         <Badge variant="default">Ativa</Badge>
                       ) : (
                         <Badge variant="secondary">Inativa</Badge>
@@ -316,7 +316,7 @@ export default function ApiKeysPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        {key.isActive === 1 ? (
+                        {(key.isActive === true || key.isActive === 1) ? (
                           <Button
                             variant="outline"
                             size="sm"
@@ -363,14 +363,14 @@ export default function ApiKeysPage() {
           <div>
             <h3 className="font-semibold mb-2">1. Listar Bases de Conhecimento</h3>
             <code className="block bg-gray-100 p-3 rounded text-sm">
-              GET https://seu-app.manus.space/api/knowledge-bases<br />
+              GET {window.location.origin}/api/knowledge-bases<br />
               Authorization: Bearer sk_...
             </code>
           </div>
           <div>
             <h3 className="font-semibold mb-2">2. Consultar Base Específica</h3>
             <code className="block bg-gray-100 p-3 rounded text-sm">
-              POST https://seu-app.manus.space/api/kb/{"{"}"id"{"}"}/query<br />
+              POST {window.location.origin}/api/kb/{"{"}"id"{"}"}/query<br />
               Authorization: Bearer sk_...<br />
               Content-Type: application/json<br />
               <br />
