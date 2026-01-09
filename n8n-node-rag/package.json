@@ -20,6 +20,9 @@
     "url": "https://github.com/ftsmazzo/sistema-rag.git",
     "directory": "n8n-node-rag"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "index.js",
   "scripts": {
     "build": "tsc",

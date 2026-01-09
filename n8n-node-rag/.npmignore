@@ -1,0 +1,12 @@
+node_modules/
+src/
+*.ts
+!*.d.ts
+tsconfig.json
+gulpfile.js
+.gitignore
+README.md
+INSTALACAO_RAPIDA.md
+*.log
+.DS_Store
+.env

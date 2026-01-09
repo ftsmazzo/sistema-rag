@@ -9,7 +9,7 @@ export class RAG implements INodeType {
   description: INodeTypeDescription = {
     displayName: 'RAG Knowledge Base',
     name: 'rag',
-    icon: 'file:rag.svg',
+    icon: 'file:nodes/RAG/rag.svg',
     iconColor: '#6366F1',
     group: ['transform'],
     version: 1,
