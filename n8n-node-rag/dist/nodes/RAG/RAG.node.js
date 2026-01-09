@@ -4,16 +4,16 @@ exports.RAG = void 0;
 class RAG {
     constructor() {
         this.description = {
-            displayName: 'RAG Knowledge Base',
+            displayName: 'FabricaIa-RAG',
             name: 'rag',
             icon: 'file:nodes/RAG/rag.svg',
             iconColor: '#6366F1',
-            group: ['transform'],
+            group: ['transform', 'ai'],
             version: 1,
             subtitle: '={{$parameter["operation"]}}',
             description: 'Query your RAG Knowledge Base with semantic search',
             defaults: {
-                name: 'RAG Knowledge Base',
+                name: 'FabricaIa-RAG',
             },
             inputs: ['main'],
             outputs: ['main'],
@@ -108,9 +108,12 @@ class RAG {
                             },
                         });
                         if (response.success && Array.isArray(response.data)) {
-                            return response.data
-                                .filter((kb) => kb.isActive === true || kb.isActive === 1)
-                                .map((kb) => ({
+                            // Filter active knowledge bases (handle both boolean and numeric)
+                            const activeBases = response.data.filter((kb) => {
+                                const isActive = kb.isActive === true || kb.isActive === 1 || kb.isActive === 'true';
+                                return isActive;
+                            });
+                            return activeBases.map((kb) => ({
                                 name: kb.name,
                                 value: kb.id,
                             }));
@@ -162,9 +165,16 @@ class RAG {
                 }
                 else if (operation === 'query') {
                     // Query knowledge base
-                    const knowledgeBaseId = this.getNodeParameter('knowledgeBaseId', i);
+                    const knowledgeBaseIdParam = this.getNodeParameter('knowledgeBaseId', i);
+                    // Ensure it's a number (handle both string and number from options)
+                    const knowledgeBaseId = typeof knowledgeBaseIdParam === 'string'
+                        ? parseInt(knowledgeBaseIdParam, 10)
+                        : Number(knowledgeBaseIdParam);
                     const query = this.getNodeParameter('query', i);
                     const topK = this.getNodeParameter('topK', i, 5);
+                    if (!knowledgeBaseId || isNaN(knowledgeBaseId)) {
+                        throw new Error('Invalid knowledge base ID. Please select a knowledge base.');
+                    }
                     const response = await this.helpers.httpRequest({
                         method: 'POST',
                         url: `${apiUrl}/api/kb/${knowledgeBaseId}/query`,
@@ -177,12 +187,25 @@ class RAG {
                             topK,
                         },
                     });
+                    // Handle both direct data response and wrapped success response
                     if (response.success && response.data) {
                         returnData.push({
                             json: {
                                 answer: response.data.answer,
                                 sources: response.data.sources || [],
                                 knowledgeBase: response.data.knowledgeBase || {},
+                                query,
+                                topK,
+                            },
+                        });
+                    }
+                    else if (response.answer) {
+                        // Direct response format (fallback)
+                        returnData.push({
+                            json: {
+                                answer: response.answer,
+                                sources: response.sources || [],
+                                knowledgeBase: response.knowledgeBase || {},
                                 query,
                                 topK,
                             },
