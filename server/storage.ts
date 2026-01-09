@@ -28,6 +28,9 @@ function getMinioClient(): Client {
         // If port is not explicitly set and URL has a port, use it
         if (!ENV.minioPort && url.port) {
           port = parseInt(url.port);
+        } else if (!ENV.minioPort) {
+          // Default port based on protocol if not specified
+          port = url.protocol === "https:" ? 443 : 9000;
         }
         // Auto-detect SSL from protocol
         if (url.protocol === "https:") {
@@ -36,6 +39,16 @@ function getMinioClient(): Client {
       } catch (e) {
         console.warn("[MinIO] Failed to parse endpoint URL, using as-is:", endpoint);
       }
+    }
+
+    // For EasyPanel internal services, try to use service name if endpoint looks like a domain
+    // EasyPanel services can be accessed by service name internally
+    // If endpoint contains easypanel.host, try using just the service name part
+    if (endpoint.includes("easypanel.host") && !endpoint.includes("://")) {
+      // Extract service name: "saas-agentes-minio.90qhxz.easypanel.host" -> "saas-agentes-minio"
+      const serviceName = endpoint.split(".")[0];
+      console.log("[MinIO] Detected EasyPanel domain, trying service name:", serviceName);
+      // Keep original endpoint as fallback, but log the service name option
     }
 
     console.log("[MinIO] Connecting to:", { endpoint, port, useSSL, bucketName });
