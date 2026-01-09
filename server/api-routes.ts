@@ -248,12 +248,12 @@ router.get("/db/tables/:tableName", async (req: Request, res: Response) => {
     }
 
     const { Pool } = await import("pg");
-    const pool = new Pool({
+    const tempPool = new Pool({
       connectionString: process.env.DATABASE_URL!,
     });
-    const result = await pool.query(`SELECT * FROM ${tableName} LIMIT 100`);
+    const result = await tempPool.query(`SELECT * FROM ${tableName} LIMIT 100`);
     const rows = result.rows;
-    await connection.end();
+    await tempPool.end();
     
     res.json({ table: tableName, rows, count: (rows as any[]).length });
   } catch (error: any) {
