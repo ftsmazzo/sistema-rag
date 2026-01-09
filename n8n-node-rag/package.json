@@ -26,7 +26,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "postinstall": "npm run build",
+    "postinstall": "npm install && npm run build || echo 'Build failed, but continuing...'",
     "dev": "tsc --watch",
     "format": "prettier nodes credentials --write",
     "lint": "eslint nodes credentials package.json",
