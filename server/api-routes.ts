@@ -124,13 +124,30 @@ router.post("/kb/:id/query", validateApiKey, async (req: Request, res: Response)
     
     // Calculate cosine similarity
     const similarities = results.map(result => {
-      const embedding = JSON.parse(result.embedding);
+      // Embedding from vector type is already an array (fromDriver handles parsing)
+      // But it might be stored as string in some cases, so handle both
+      let embedding: number[];
+      if (typeof result.embedding === 'string') {
+        try {
+          embedding = JSON.parse(result.embedding);
+        } catch (e) {
+          console.error("[API] Failed to parse embedding:", e);
+          // Skip this result if embedding is invalid
+          return null;
+        }
+      } else if (Array.isArray(result.embedding)) {
+        embedding = result.embedding;
+      } else {
+        console.error("[API] Invalid embedding format:", typeof result.embedding);
+        return null;
+      }
+      
       const similarity = cosineSimilarity(queryEmbedding, embedding);
       return {
         ...result,
         similarity,
       };
-    });
+    }).filter((r): r is NonNullable<typeof r> => r !== null);
     
     // Sort by similarity and take top K
     const topResults = similarities
