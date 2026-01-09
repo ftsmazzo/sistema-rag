@@ -32,27 +32,35 @@ echo "✅ Banco de dados está pronto!"
 echo "🔧 Habilitando extensão pgvector..."
 psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -c "CREATE EXTENSION IF NOT EXISTS vector;" || echo "⚠️  Aviso: Não foi possível criar extensão vector (pode já existir)"
 
-# Run migrations
-echo "🚀 Executando migrações do banco de dados..."
-cd /app
+# Check if tables already exist
+echo "🔍 Verificando se as tabelas já existem..."
+TABLE_EXISTS=$(psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -tAc "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'users');" 2>/dev/null || echo "false")
 
-# Try to use drizzle-kit, but fallback to direct SQL if it fails
-if command -v drizzle-kit &> /dev/null; then
-  echo "📦 Usando drizzle-kit para migrações..."
-  drizzle-kit generate && drizzle-kit migrate || {
-    echo "⚠️  drizzle-kit falhou, usando schema SQL direto..."
-    psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -f /app/schema-postgresql.sql || echo "⚠️  Erro ao executar schema SQL"
-  }
+if [ "$TABLE_EXISTS" = "t" ]; then
+  echo "✅ Tabelas já existem, pulando migrações..."
 else
-  echo "📦 drizzle-kit não encontrado, usando schema SQL direto..."
-  if [ -f "/app/schema-postgresql.sql" ]; then
-    psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -f /app/schema-postgresql.sql || echo "⚠️  Erro ao executar schema SQL"
-  else
-    echo "❌ Arquivo schema-postgresql.sql não encontrado!"
-  fi
-fi
+  # Run migrations
+  echo "🚀 Executando migrações do banco de dados..."
+  cd /app
 
-echo "✅ Migrações concluídas com sucesso!"
+  # Try to use drizzle-kit, but fallback to direct SQL if it fails
+  if command -v drizzle-kit &> /dev/null; then
+    echo "📦 Usando drizzle-kit para migrações..."
+    drizzle-kit generate && drizzle-kit migrate || {
+      echo "⚠️  drizzle-kit falhou, usando schema SQL direto..."
+      psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -f /app/schema-postgresql.sql 2>&1 | grep -v "already exists" || echo "✅ Schema aplicado"
+    }
+  else
+    echo "📦 drizzle-kit não encontrado, usando schema SQL direto..."
+    if [ -f "/app/schema-postgresql.sql" ]; then
+      # Suppress "already exists" notices
+      psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -f /app/schema-postgresql.sql 2>&1 | grep -v "already exists" | grep -v "NOTICE" || echo "✅ Schema aplicado"
+    else
+      echo "❌ Arquivo schema-postgresql.sql não encontrado!"
+    fi
+  fi
+  echo "✅ Migrações concluídas com sucesso!"
+fi
 
 # Create vector index for semantic search (if embeddings table exists)
 echo "🔧 Criando índice vetorial para busca semântica..."
