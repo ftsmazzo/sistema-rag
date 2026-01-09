@@ -6,28 +6,35 @@ Você **NÃO precisa compilar** no servidor. Os arquivos `.js` já estão no rep
 
 ## 🚀 Instalação no n8n (EasyPanel)
 
-### No Terminal do n8n:
+### Opção 1: Script Automático (MAIS FÁCIL!)
+
+```bash
+# No terminal do n8n, execute:
+cd ~/.n8n/custom
+curl -sSL https://raw.githubusercontent.com/ftsmazzo/sistema-rag/master/n8n-node-rag/INSTALAR.sh | sh
+```
+
+### Opção 2: Manual (Passo a Passo)
 
 ```bash
 # 1. Criar pasta custom
 mkdir -p ~/.n8n/custom
 cd ~/.n8n/custom
 
-# 2. Clonar apenas a pasta n8n-node-rag
-git clone --depth 1 --filter=blob:none --sparse https://github.com/ftsmazzo/sistema-rag.git temp-rag
-cd temp-rag
-git sparse-checkout set n8n-node-rag
-cd ..
+# 2. Clonar repositório (completo, mas é pequeno)
+git clone --depth 1 https://github.com/ftsmazzo/sistema-rag.git temp-rag
 
-# 3. Mover para o lugar certo
-mv temp-rag/n8n-node-rag .
+# 3. Copiar apenas a pasta n8n-node-rag
+cp -r temp-rag/n8n-node-rag .
+
+# 4. Limpar
 rm -rf temp-rag
 
-# 4. Instalar (SEM COMPILAR!)
+# 5. Instalar (SEM COMPILAR - já vem compilado!)
 cd n8n-node-rag
 npm install --production
 
-# 5. Reiniciar o n8n no EasyPanel
+# 6. Reiniciar o n8n no EasyPanel
 ```
 
 ## ✅ Depois
