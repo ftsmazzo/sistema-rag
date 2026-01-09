@@ -1,6 +1,8 @@
 import {
   IExecuteFunctions,
+  ILoadOptionsFunctions,
   INodeExecutionData,
+  INodePropertyOptions,
   INodeType,
   INodeTypeDescription,
 } from 'n8n-workflow';
@@ -10,8 +12,8 @@ export class RAG implements INodeType {
     displayName: 'FabricaIa-RAG',
     name: 'rag',
     icon: 'file:nodes/RAG/rag.svg',
-    iconColor: '#6366F1',
-    group: ['transform', 'ai'],
+    iconColor: '#6366F1' as any,
+    group: ['transform'] as any,
     version: 1,
     subtitle: '={{$parameter["operation"]}}',
     description: 'Query your RAG Knowledge Base with semantic search',
@@ -99,7 +101,7 @@ export class RAG implements INodeType {
 
   methods = {
     loadOptions: {
-      async getKnowledgeBases(this: IExecuteFunctions): Promise<Array<{ name: string; value: number }>> {
+      async getKnowledgeBases(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
         const credentials = await this.getCredentials('ragApi');
         const apiUrl = credentials.apiUrl as string;
 
