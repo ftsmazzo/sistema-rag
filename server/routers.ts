@@ -1315,11 +1315,17 @@ async function processDocumentAsync(
       );
     }
     
+    // Notify owner if document is large (non-blocking)
     if (chunks.length > 50) {
-      await notifyOwner({
-        title: "Documento grande processado",
-        content: `Documento ID ${documentId} foi processado com sucesso. Total de chunks: ${chunks.length}`,
-      });
+      try {
+        await notifyOwner({
+          title: "Documento grande processado",
+          content: `Documento ID ${documentId} foi processado com sucesso. Total de chunks: ${chunks.length}`,
+        });
+      } catch (notifyError) {
+        // Non-blocking: log but don't fail document processing
+        console.warn("[ProcessDocument] Failed to notify owner (non-blocking):", notifyError);
+      }
     }
   } catch (error) {
     console.error(`[ProcessDocument] Error processing document ${documentId}:`, error);
@@ -1344,9 +1350,15 @@ async function processDocumentAsync(
       console.error("[ProcessDocument] Failed to send webhook:", webhookError);
     }
     
-    await notifyOwner({
-      title: "Falha no processamento de documento",
-      content: `Documento ID ${documentId} falhou: ${errorMessage}`,
-    });
+    // Notify owner about failure (non-blocking)
+    try {
+      await notifyOwner({
+        title: "Falha no processamento de documento",
+        content: `Documento ID ${documentId} falhou: ${errorMessage}`,
+      });
+    } catch (notifyError) {
+      // Non-blocking: log but don't fail error handling
+      console.warn("[ProcessDocument] Failed to notify owner (non-blocking):", notifyError);
+    }
   }
 }

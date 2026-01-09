@@ -215,7 +215,9 @@ const resolveApiUrl = () =>
     : "https://forge.manus.im/v1/chat/completions";
 
 const assertApiKey = () => {
-  if (!ENV.forgeApiKey) {
+  // Check OPENAI_API_KEY directly (same as generateEmbedding uses)
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
     throw new Error("OPENAI_API_KEY is not configured");
   }
 };
