@@ -14,11 +14,25 @@ export async function getDb() {
     try {
       _pool = new Pool({
         connectionString: process.env.DATABASE_URL,
+        // Add connection timeout and retry logic
+        connectionTimeoutMillis: 5000,
+        idleTimeoutMillis: 30000,
       });
+      
+      // Test connection
+      await _pool.query('SELECT 1');
+      
       _db = drizzle(_pool);
-    } catch (error) {
-      console.warn("[Database] Failed to connect:", error);
+      console.log("[Database] Connected successfully");
+    } catch (error: any) {
+      console.error("[Database] Failed to connect:", error);
+      console.error("[Database] Connection error details:", {
+        message: error?.message,
+        code: error?.code,
+        stack: error?.stack,
+      });
       _db = null;
+      _pool = null;
     }
   }
   return _db;
