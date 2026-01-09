@@ -80,7 +80,7 @@ router.get("/knowledge-bases", validateApiKey, async (req: Request, res: Respons
         id: kb.id,
         name: kb.name,
         description: kb.description,
-        isActive: kb.isActive === 1,
+        isActive: kb.isActive === true || kb.isActive === 1,
         createdAt: kb.createdAt,
       })),
     });

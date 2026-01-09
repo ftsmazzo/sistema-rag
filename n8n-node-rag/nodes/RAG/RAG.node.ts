@@ -114,12 +114,16 @@ export class RAG implements INodeType {
           });
 
           if (response.success && Array.isArray(response.data)) {
-            return response.data
-              .filter((kb: any) => kb.isActive === true || kb.isActive === 1)
-              .map((kb: any) => ({
-                name: kb.name,
-                value: kb.id,
-              }));
+            // Filter active knowledge bases (handle both boolean and numeric)
+            const activeBases = response.data.filter((kb: any) => {
+              const isActive = kb.isActive === true || kb.isActive === 1 || kb.isActive === 'true';
+              return isActive;
+            });
+            
+            return activeBases.map((kb: any) => ({
+              name: kb.name,
+              value: kb.id,
+            }));
           }
 
           return [];
