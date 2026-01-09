@@ -286,8 +286,8 @@ export const appRouter = router({
           originalFilename: input.filename,
           fileType: input.fileType,
           fileSize: input.fileSize,
-          s3Key,
-          s3Url,
+          storageKey: s3Key,
+          storageUrl: s3Url,
           status: "processing",
         });
         
