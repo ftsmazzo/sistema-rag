@@ -523,10 +523,16 @@ export const appRouter = router({
           ...input,
         });
 
-        await notifyOwner({
-          title: `Novo Feedback: ${input.title}`,
-          content: `Tipo: ${input.type}\nPrioridade: ${input.priority || "medium"}\n\n${input.description}`,
-        });
+        // Notify owner about new feedback (non-blocking)
+        try {
+          await notifyOwner({
+            title: `Novo Feedback: ${input.title}`,
+            content: `Tipo: ${input.type}\nPrioridade: ${input.priority || "medium"}\n\n${input.description}`,
+          });
+        } catch (notifyError) {
+          // Non-blocking: log but don't fail feedback creation
+          console.warn("[Feedback] Failed to notify owner (non-blocking):", notifyError);
+        }
 
         return feedback;
       }),
