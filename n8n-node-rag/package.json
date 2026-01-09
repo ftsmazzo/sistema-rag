@@ -25,7 +25,8 @@
   },
   "main": "index.js",
   "scripts": {
-    "build": "node_modules/.bin/tsc || npx -y typescript tsc",
+    "build": "node_modules/.bin/tsc || npx -y typescript tsc && npm run build:icons",
+    "build:icons": "gulp build:icons || echo 'Gulp not available, copying icons manually' && mkdir -p dist/nodes/RAG && cp nodes/RAG/rag.svg dist/nodes/RAG/rag.svg || true",
     "postinstall": "echo 'Skipping build - using pre-compiled files'",
     "dev": "tsc --watch",
     "format": "prettier nodes credentials --write",

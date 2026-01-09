@@ -9,7 +9,7 @@ export class RAG implements INodeType {
   description: INodeTypeDescription = {
     displayName: 'FabricaIa-RAG',
     name: 'rag',
-    icon: 'file:nodes/RAG/rag.svg',
+    icon: 'file:rag.svg',
     iconColor: '#6366F1',
     group: ['transform', 'ai'],
     version: 1,
