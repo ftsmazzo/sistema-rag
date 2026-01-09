@@ -7,9 +7,9 @@ let minioClient: Client | null = null;
 
 function getMinioClient(): Client {
   if (!minioClient) {
-    const endpoint = ENV.minioEndpoint || "localhost";
-    const port = ENV.minioPort || 9000;
-    const useSSL = ENV.minioUseSSL || false;
+    let endpoint = ENV.minioEndpoint || "localhost";
+    let port = ENV.minioPort || 9000;
+    let useSSL = ENV.minioUseSSL || false;
     const accessKey = ENV.minioAccessKey;
     const secretKey = ENV.minioSecretKey;
     const bucketName = ENV.minioBucketName || "rag-documents";
@@ -19,6 +19,26 @@ function getMinioClient(): Client {
         "MinIO credentials missing: set MINIO_ACCESS_KEY and MINIO_SECRET_KEY environment variables"
       );
     }
+
+    // Extract hostname from URL if provided (e.g., "https://minio.example.com" -> "minio.example.com")
+    if (endpoint.includes("://")) {
+      try {
+        const url = new URL(endpoint);
+        endpoint = url.hostname;
+        // If port is not explicitly set and URL has a port, use it
+        if (!ENV.minioPort && url.port) {
+          port = parseInt(url.port);
+        }
+        // Auto-detect SSL from protocol
+        if (url.protocol === "https:") {
+          useSSL = true;
+        }
+      } catch (e) {
+        console.warn("[MinIO] Failed to parse endpoint URL, using as-is:", endpoint);
+      }
+    }
+
+    console.log("[MinIO] Connecting to:", { endpoint, port, useSSL, bucketName });
 
     minioClient = new Client({
       endPoint: endpoint,
