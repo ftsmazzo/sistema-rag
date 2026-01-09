@@ -144,13 +144,10 @@ export async function createDocument(doc: InsertDocument): Promise<Document> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  const result = await db.insert(documents).values(doc);
-  const insertedId = Number(result[0].insertId);
+  const result = await db.insert(documents).values(doc).returning();
+  if (!result[0]) throw new Error("Failed to insert document");
   
-  const inserted = await db.select().from(documents).where(eq(documents.id, insertedId)).limit(1);
-  if (!inserted[0]) throw new Error("Failed to retrieve inserted document");
-  
-  return inserted[0];
+  return result[0];
 }
 
 export async function updateDocumentStatus(
