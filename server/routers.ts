@@ -1282,13 +1282,18 @@ async function processDocumentAsync(
       
       const embedding = await generateEmbedding(chunk.content, userId, organizationId);
       
+      // Ensure embedding is an array
+      if (!Array.isArray(embedding)) {
+        throw new Error(`Invalid embedding format: expected array, got ${typeof embedding}`);
+      }
+      
       await createEmbedding({
         chunkId: savedChunk.id,
         documentId,
         userId,
         organizationId,
         knowledgeBaseId,
-        embedding: JSON.stringify(embedding),
+        embedding: embedding, // Pass array directly, not JSON string
         embeddingModel: "text-embedding-3-small",
       });
     }
