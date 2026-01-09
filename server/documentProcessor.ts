@@ -18,6 +18,20 @@ export interface ProcessedChunk {
 }
 
 /**
+ * Sanitize text to remove invalid UTF-8 characters and null bytes
+ * This is critical for PostgreSQL which requires valid UTF-8
+ */
+function sanitizeText(text: string): string {
+  // Remove null bytes and other control characters (except newlines, tabs, carriage returns)
+  return text
+    .replace(/\x00/g, '') // Remove null bytes
+    .replace(/[\x01-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '') // Remove other control chars except \n, \t, \r
+    .replace(/[\uFFFE\uFFFF]/g, '') // Remove invalid Unicode characters
+    .normalize('NFKC') // Normalize Unicode (decompose and recompose)
+    .trim();
+}
+
+/**
  * Estimate token count (rough approximation: 1 token ≈ 4 characters)
  */
 function estimateTokens(text: string): number {
@@ -108,7 +122,9 @@ export async function processPDF(buffer: Buffer): Promise<string> {
             ).join(" ")
           ).join("\n\n");
           
-          resolve(text.trim() || "[PDF sem texto extraível]");
+          // Sanitize text to remove invalid UTF-8 characters and null bytes
+          const sanitized = sanitizeText(text);
+          resolve(sanitized || "[PDF sem texto extraível]");
         } catch (err) {
           reject(err);
         }
@@ -212,8 +228,11 @@ export async function processDocument(
         throw new Error(`Unsupported file type: ${fileType}`);
     }
     
+    // Sanitize extracted text to ensure valid UTF-8 (remove null bytes, control chars)
+    const sanitizedText = sanitizeText(extractedText);
+    
     // Chunk the extracted text
-    return chunkText(extractedText);
+    return chunkText(sanitizedText);
     
   } catch (error) {
     console.error("[DocumentProcessor] Error processing document:", error);
