@@ -17,6 +17,14 @@ function vector(name: string, options?: { dimensions?: number }) {
   })(name);
 }
 
+// Define enums
+export const roleEnum = pgEnum("role", ["user", "admin"]);
+export const documentStatusEnum = pgEnum("status", ["uploading", "processing", "completed", "failed"]);
+export const feedbackStatusEnum = pgEnum("status", ["open", "in_progress", "resolved", "closed"]);
+export const priorityEnum = pgEnum("priority", ["low", "medium", "high"]);
+export const feedbackTypeEnum = pgEnum("type", ["bug", "feature", "improvement", "other"]);
+export const notificationTypeEnum = pgEnum("type", ["info", "warning", "error", "success"]);
+
 /**
  * Organizations table for multi-tenant support
  */
@@ -68,7 +76,7 @@ export const users = pgTable("users", {
   email: varchar("email", { length: 320 }).notNull().unique(),
   password: varchar("password", { length: 255 }).notNull(), // Hashed password
   name: text("name"),
-  role: pgEnum("role", ["user", "admin"]).default("user").notNull(),
+  role: roleEnum("role").default("user").notNull(),
   organizationId: integer("organizationId").references(() => organizations.id), // NULL for super admins, set for org users
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().$onUpdate(() => new Date()).notNull(),
@@ -95,7 +103,7 @@ export const documents = pgTable("documents", {
   fileSize: integer("fileSize").notNull(), // in bytes
   storageKey: varchar("storageKey", { length: 512 }).notNull(), // MinIO key (was s3Key)
   storageUrl: text("storageUrl").notNull(), // MinIO URL (was s3Url)
-  status: pgEnum("status", ["uploading", "processing", "completed", "failed"]).default("uploading").notNull(),
+  status: documentStatusEnum("status").default("uploading").notNull(),
   errorMessage: text("errorMessage"),
   metadata: text("metadata"), // JSON string for additional metadata
   tags: text("tags"), // Comma-separated tags
@@ -197,11 +205,11 @@ export const feedback = pgTable("feedback", {
   id: serial("id").primaryKey(),
   userId: integer("userId").notNull().references(() => users.id),
   organizationId: integer("organizationId").references(() => organizations.id), // Optional - feedback can be org-specific or global
-  type: pgEnum("type", ["bug", "feature", "improvement", "other"]).notNull(),
+  type: feedbackTypeEnum("type").notNull(),
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description").notNull(),
-  status: pgEnum("status", ["open", "in_progress", "resolved", "closed"]).default("open").notNull(),
-  priority: pgEnum("priority", ["low", "medium", "high"]).default("medium").notNull(),
+  status: feedbackStatusEnum("status").default("open").notNull(),
+  priority: priorityEnum("priority").default("medium").notNull(),
   adminResponse: text("adminResponse"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().$onUpdate(() => new Date()).notNull(),
@@ -221,7 +229,7 @@ export const notifications = pgTable("notifications", {
   id: serial("id").primaryKey(),
   userId: integer("userId").notNull().references(() => users.id), // Admin user who should see this
   organizationId: integer("organizationId").references(() => organizations.id), // Optional - notification can be org-specific or global
-  type: pgEnum("type", ["info", "warning", "error", "success"]).default("info").notNull(),
+  type: notificationTypeEnum("type").default("info").notNull(),
   title: varchar("title", { length: 255 }).notNull(),
   message: text("message").notNull(),
   isRead: boolean("isRead").default(false).notNull(),
