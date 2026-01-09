@@ -199,16 +199,32 @@ export const appRouter = router({
         const user = await getUserByEmail(input.email);
         
         if (!user) {
+          console.log("[Login] User not found:", input.email);
           throw new TRPCError({
             code: "UNAUTHORIZED",
             message: "Invalid email or password",
           });
         }
 
+        // Debug: Log password hash info
+        console.log("[Login] User found:", {
+          id: user.id,
+          email: user.email,
+          passwordHashLength: user.password?.length || 0,
+          passwordHashStart: user.password?.substring(0, 20) || "null",
+          passwordHashType: typeof user.password,
+        });
+
         // Verify password
+        console.log("[Login] Verifying password...");
         const isValid = await verifyPassword(input.password, user.password);
+        console.log("[Login] Password verification result:", isValid);
         
         if (!isValid) {
+          console.log("[Login] Password verification failed for user:", user.email);
+          console.log("[Login] Hash from DB:", user.password);
+          console.log("[Login] Hash length:", user.password?.length);
+          console.log("[Login] Hash type:", typeof user.password);
           throw new TRPCError({
             code: "UNAUTHORIZED",
             message: "Invalid email or password",

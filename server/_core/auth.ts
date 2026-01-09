@@ -67,7 +67,37 @@ export async function hashPassword(password: string): Promise<string> {
 }
 
 export async function verifyPassword(password: string, hash: string): Promise<boolean> {
-  return bcrypt.compare(password, hash);
+  try {
+    // Debug logging
+    if (!hash || typeof hash !== 'string') {
+      console.error("[Auth] Invalid hash:", { hash, type: typeof hash });
+      return false;
+    }
+    
+    if (!password || typeof password !== 'string') {
+      console.error("[Auth] Invalid password:", { password, type: typeof password });
+      return false;
+    }
+
+    // Trim hash in case there are spaces
+    const trimmedHash = hash.trim();
+    
+    console.log("[Auth] Verifying password:", {
+      passwordLength: password.length,
+      hashLength: hash.length,
+      trimmedHashLength: trimmedHash.length,
+      hashStart: hash.substring(0, 10),
+      hashEnd: hash.substring(hash.length - 10),
+    });
+
+    const result = await bcrypt.compare(password, trimmedHash);
+    console.log("[Auth] bcrypt.compare result:", result);
+    
+    return result;
+  } catch (error) {
+    console.error("[Auth] Error verifying password:", error);
+    return false;
+  }
 }
 
 export async function authenticateRequest(req: Request) {
