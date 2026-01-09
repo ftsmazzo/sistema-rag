@@ -202,7 +202,7 @@ export default function Upload() {
                 onChange={(e) => setSelectedKnowledgeBaseId(Number(e.target.value))}
               >
                 <option value="">Selecione uma base...</option>
-                {knowledgeBases.filter(kb => kb.isActive === 1).map((kb) => (
+                {knowledgeBases.filter(kb => kb.isActive === true || kb.isActive === 1).map((kb) => (
                   <option key={kb.id} value={kb.id}>
                     {kb.name} ({kb.description || "Sem descrição"})
                   </option>

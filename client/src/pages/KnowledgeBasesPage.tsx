@@ -486,7 +486,7 @@ function KnowledgeBaseCard({
                 </DialogFooter>
               </DialogContent>
             </Dialog>
-            {base.isActive === 1 ? (
+            {base.isActive === true || base.isActive === 1 ? (
               <Button variant="destructive" size="sm" onClick={onDeactivate}>
                 Desativar
               </Button>
