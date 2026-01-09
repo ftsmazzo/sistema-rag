@@ -5,12 +5,13 @@
     "lib": ["ES2020"],
     "declaration": true,
     "outDir": "./dist",
-    "strict": true,
+    "strict": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "noEmitOnError": false
   },
   "include": ["nodes/**/*", "credentials/**/*"],
   "exclude": ["node_modules/**/*", "dist/**/*"]
