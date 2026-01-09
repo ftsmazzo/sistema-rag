@@ -25,7 +25,7 @@
   },
   "main": "index.js",
   "scripts": {
-    "build": "tsc && npm run build:icons",
+    "build": "tsc --skipLibCheck && npm run build:icons",
     "build:icons": "node -e \"const fs=require('fs');const path=require('path');const src='nodes/RAG/rag.svg';const dest='dist/nodes/RAG/rag.svg';fs.mkdirSync(path.dirname(dest),{recursive:true});fs.copyFileSync(src,dest);\" || echo 'Icon copy failed'",
     "postinstall": "echo 'Skipping build - using pre-compiled files'",
     "dev": "tsc --watch",
