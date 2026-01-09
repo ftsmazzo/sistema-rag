@@ -74,6 +74,7 @@ COPY server/_core ./server/_core
 COPY shared ./shared
 COPY scripts/init-db.sh ./scripts/init-db.sh
 COPY drizzle.config.ts ./drizzle.config.ts
+COPY schema-postgresql.sql ./schema-postgresql.sql
 
 # Create non-root user and make init script executable
 RUN groupadd -g 1001 nodejs && \

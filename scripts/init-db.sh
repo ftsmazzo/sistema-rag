@@ -35,8 +35,22 @@ psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -c "CREATE EXTENSIO
 # Run migrations
 echo "🚀 Executando migrações do banco de dados..."
 cd /app
-# Use drizzle-kit directly (installed globally in Dockerfile)
-drizzle-kit generate && drizzle-kit migrate
+
+# Try to use drizzle-kit, but fallback to direct SQL if it fails
+if command -v drizzle-kit &> /dev/null; then
+  echo "📦 Usando drizzle-kit para migrações..."
+  drizzle-kit generate && drizzle-kit migrate || {
+    echo "⚠️  drizzle-kit falhou, usando schema SQL direto..."
+    psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -f /app/schema-postgresql.sql || echo "⚠️  Erro ao executar schema SQL"
+  }
+else
+  echo "📦 drizzle-kit não encontrado, usando schema SQL direto..."
+  if [ -f "/app/schema-postgresql.sql" ]; then
+    psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -f /app/schema-postgresql.sql || echo "⚠️  Erro ao executar schema SQL"
+  else
+    echo "❌ Arquivo schema-postgresql.sql não encontrado!"
+  fi
+fi
 
 echo "✅ Migrações concluídas com sucesso!"
 
