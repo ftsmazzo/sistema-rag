@@ -7,7 +7,7 @@ import {
 
 export class RAG implements INodeType {
   description: INodeTypeDescription = {
-    displayName: 'RAG Knowledge Base',
+    displayName: 'FabricaIa-RAG',
     name: 'rag',
     icon: 'file:nodes/RAG/rag.svg',
     iconColor: '#6366F1',
@@ -16,7 +16,7 @@ export class RAG implements INodeType {
     subtitle: '={{$parameter["operation"]}}',
     description: 'Query your RAG Knowledge Base with semantic search',
     defaults: {
-      name: 'RAG Knowledge Base',
+      name: 'FabricaIa-RAG',
     },
     inputs: ['main'],
     outputs: ['main'],
@@ -168,9 +168,18 @@ export class RAG implements INodeType {
           }
         } else if (operation === 'query') {
           // Query knowledge base
-          const knowledgeBaseId = this.getNodeParameter('knowledgeBaseId', i) as number;
+          const knowledgeBaseIdParam = this.getNodeParameter('knowledgeBaseId', i);
+          // Ensure it's a number (handle both string and number from options)
+          const knowledgeBaseId = typeof knowledgeBaseIdParam === 'string' 
+            ? parseInt(knowledgeBaseIdParam, 10) 
+            : Number(knowledgeBaseIdParam);
+          
           const query = this.getNodeParameter('query', i) as string;
           const topK = this.getNodeParameter('topK', i, 5) as number;
+
+          if (!knowledgeBaseId || isNaN(knowledgeBaseId)) {
+            throw new Error('Invalid knowledge base ID. Please select a knowledge base.');
+          }
 
           const response = await this.helpers.httpRequest({
             method: 'POST',
@@ -185,12 +194,24 @@ export class RAG implements INodeType {
             },
           });
 
+          // Handle both direct data response and wrapped success response
           if (response.success && response.data) {
             returnData.push({
               json: {
                 answer: response.data.answer,
                 sources: response.data.sources || [],
                 knowledgeBase: response.data.knowledgeBase || {},
+                query,
+                topK,
+              },
+            });
+          } else if (response.answer) {
+            // Direct response format (fallback)
+            returnData.push({
+              json: {
+                answer: response.answer,
+                sources: response.sources || [],
+                knowledgeBase: response.knowledgeBase || {},
                 query,
                 topK,
               },
