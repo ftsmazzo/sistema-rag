@@ -9,10 +9,14 @@ import { getAllUserEmbeddings, getChunksByIds, getOrCreateSystemSettings } from 
 import { generateEmbedding, cosineSimilarity } from "./documentProcessor";
 import { invokeLLM } from "./_core/llm";
 import { validateApiKey as validateKey } from "./db-api-keys";
-import { drizzle } from "drizzle-orm/mysql2";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 import { apiLogs } from "../drizzle/schema";
 
-const db = drizzle(process.env.DATABASE_URL!);
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL!,
+});
+const db = drizzle(pool);
 
 const router = Router();
 
@@ -243,10 +247,12 @@ router.get("/db/tables/:tableName", async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Invalid table name" });
     }
 
-    const mysql = await import("mysql2/promise");
-    const connection = await mysql.createConnection(process.env.DATABASE_URL!);
-    
-    const [rows] = await connection.execute(`SELECT * FROM ${tableName} LIMIT 100`);
+    const { Pool } = await import("pg");
+    const pool = new Pool({
+      connectionString: process.env.DATABASE_URL!,
+    });
+    const result = await pool.query(`SELECT * FROM ${tableName} LIMIT 100`);
+    const rows = result.rows;
     await connection.end();
     
     res.json({ table: tableName, rows, count: (rows as any[]).length });

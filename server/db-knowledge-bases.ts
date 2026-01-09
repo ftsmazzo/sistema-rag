@@ -1,9 +1,13 @@
-import { drizzle } from "drizzle-orm/mysql2";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 import { eq, and, desc } from "drizzle-orm";
 import { knowledgeBases, documents, documentChunks, embeddings } from "../drizzle/schema";
 
 const DATABASE_URL = process.env.DATABASE_URL!;
-const db = drizzle(DATABASE_URL);
+const pool = new Pool({
+  connectionString: DATABASE_URL,
+});
+const db = drizzle(pool);
 
 /**
  * Create a new knowledge base
@@ -14,11 +18,11 @@ export async function createKnowledgeBase(data: {
   userId: number;
   organizationId: number;
 }) {
-  const [result] = await db.insert(knowledgeBases).values(data);
+  const result = await db.insert(knowledgeBases).values(data).returning();
   const [knowledgeBase] = await db
     .select()
     .from(knowledgeBases)
-    .where(eq(knowledgeBases.id, result.insertId))
+    .where(eq(knowledgeBases.id, result[0].id))
     .limit(1);
   return knowledgeBase;
 }
@@ -64,7 +68,7 @@ export async function getActiveKnowledgeBases(organizationId: number) {
     .where(
       and(
         eq(knowledgeBases.organizationId, organizationId),
-        eq(knowledgeBases.isActive, 1)
+        eq(knowledgeBases.isActive, true)
       )
     )
     .orderBy(desc(knowledgeBases.createdAt));
@@ -105,7 +109,7 @@ export async function deactivateKnowledgeBase(id: number, userId: number, organi
       )
     : and(eq(knowledgeBases.id, id), eq(knowledgeBases.userId, userId));
 
-  await db.update(knowledgeBases).set({ isActive: 0 }).where(conditions);
+  await db.update(knowledgeBases).set({ isActive: false }).where(conditions);
 }
 
 /**
@@ -120,7 +124,7 @@ export async function activateKnowledgeBase(id: number, userId: number, organiza
       )
     : and(eq(knowledgeBases.id, id), eq(knowledgeBases.userId, userId));
 
-  await db.update(knowledgeBases).set({ isActive: 1 }).where(conditions);
+  await db.update(knowledgeBases).set({ isActive: true }).where(conditions);
 }
 
 /**

@@ -793,8 +793,10 @@ export const appRouter = router({
     backup: protectedProcedure
       .input(z.object({ id: z.number() }))
       .query(async ({ ctx, input }) => {
-        const { drizzle } = await import("drizzle-orm/mysql2");
-        const db = drizzle(process.env.DATABASE_URL!);
+        const { drizzle } = await import("drizzle-orm/node-postgres");
+        const { Pool } = await import("pg");
+        const pool = new Pool({ connectionString: process.env.DATABASE_URL! });
+        const db = drizzle(pool);
         const { documents, documentChunks, embeddings, knowledgeBases } = await import("../drizzle/schema");
         const { eq } = await import("drizzle-orm");
         
@@ -829,8 +831,10 @@ export const appRouter = router({
         }),
       }))
       .mutation(async ({ ctx, input }) => {
-        const { drizzle } = await import("drizzle-orm/mysql2");
-        const db = drizzle(process.env.DATABASE_URL!);
+        const { drizzle } = await import("drizzle-orm/node-postgres");
+        const { Pool } = await import("pg");
+        const pool = new Pool({ connectionString: process.env.DATABASE_URL! });
+        const db = drizzle(pool);
         const { documents, documentChunks, embeddings, knowledgeBases } = await import("../drizzle/schema");
         
         // Create new knowledge base
@@ -954,8 +958,10 @@ export const appRouter = router({
         if (ctx.user.role !== "admin") {
           throw new TRPCError({ code: "FORBIDDEN" });
         }
-        const { drizzle } = await import("drizzle-orm/mysql2");
-        const db = drizzle(process.env.DATABASE_URL!);
+        const { drizzle } = await import("drizzle-orm/node-postgres");
+        const { Pool } = await import("pg");
+        const pool = new Pool({ connectionString: process.env.DATABASE_URL! });
+        const db = drizzle(pool);
         const { organizations, users, knowledgeBases, apiKeys, documents, documentChunks, embeddings, apiLogs } = await import("../drizzle/schema");
         const { sql } = await import("drizzle-orm");
         
@@ -990,8 +996,10 @@ export const appRouter = router({
         if (ctx.user.role !== "admin") {
           throw new TRPCError({ code: "FORBIDDEN" });
         }
-        const { drizzle } = await import("drizzle-orm/mysql2");
-        const db = drizzle(process.env.DATABASE_URL!);
+        const { drizzle } = await import("drizzle-orm/node-postgres");
+        const { Pool } = await import("pg");
+        const pool = new Pool({ connectionString: process.env.DATABASE_URL! });
+        const db = drizzle(pool);
         const { knowledgeBases, documents, documentChunks, embeddings } = await import("../drizzle/schema");
         const { sql, eq } = await import("drizzle-orm");
         
@@ -1027,8 +1035,10 @@ export const appRouter = router({
         if (ctx.user.role !== "admin") {
           throw new TRPCError({ code: "FORBIDDEN" });
         }
-        const { drizzle } = await import("drizzle-orm/mysql2");
-        const db = drizzle(process.env.DATABASE_URL!);
+        const { drizzle } = await import("drizzle-orm/node-postgres");
+        const { Pool } = await import("pg");
+        const pool = new Pool({ connectionString: process.env.DATABASE_URL! });
+        const db = drizzle(pool);
         const { apiLogs, knowledgeBases } = await import("../drizzle/schema");
         const { desc, eq, and, gte, lte, or, like } = await import("drizzle-orm");
         
@@ -1096,8 +1106,10 @@ export const appRouter = router({
         if (ctx.user.role !== "admin") {
           throw new TRPCError({ code: "FORBIDDEN" });
         }
-        const { drizzle } = await import("drizzle-orm/mysql2");
-        const db = drizzle(process.env.DATABASE_URL!);
+        const { drizzle } = await import("drizzle-orm/node-postgres");
+        const { Pool } = await import("pg");
+        const pool = new Pool({ connectionString: process.env.DATABASE_URL! });
+        const db = drizzle(pool);
         const schema = await import("../drizzle/schema");
         const { desc } = await import("drizzle-orm");
         
@@ -1138,8 +1150,10 @@ export const appRouter = router({
         if (ctx.user.role !== "admin") {
           throw new TRPCError({ code: "FORBIDDEN" });
         }
-        const { drizzle } = await import("drizzle-orm/mysql2");
-        const db = drizzle(process.env.DATABASE_URL!);
+        const { drizzle } = await import("drizzle-orm/node-postgres");
+        const { Pool } = await import("pg");
+        const pool = new Pool({ connectionString: process.env.DATABASE_URL! });
+        const db = drizzle(pool);
         const { documents, documentChunks, embeddings, apiLogs, apiKeys } = await import("../drizzle/schema");
         const { sql } = await import("drizzle-orm");
         

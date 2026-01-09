@@ -1,10 +1,14 @@
-import { drizzle } from "drizzle-orm/mysql2";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 import { eq, and } from "drizzle-orm";
 import { apiKeys } from "../drizzle/schema";
 import { nanoid } from "nanoid";
 
 const DATABASE_URL = process.env.DATABASE_URL!;
-const db = drizzle(DATABASE_URL);
+const pool = new Pool({
+  connectionString: DATABASE_URL,
+});
+const db = drizzle(pool);
 
 /**
  * Generate a new API key (32 characters)
@@ -24,15 +28,15 @@ export async function createApiKey(data: {
 }) {
   const key = generateApiKey();
   
-  const [result] = await db.insert(apiKeys).values({
+  const result = await db.insert(apiKeys).values({
     ...data,
     key,
-  });
+  }).returning();
   
   const [apiKey] = await db
     .select()
     .from(apiKeys)
-    .where(eq(apiKeys.id, result.insertId))
+    .where(eq(apiKeys.id, result[0].id))
     .limit(1);
   
   return apiKey;
@@ -60,7 +64,7 @@ export async function validateApiKey(key: string) {
   const [apiKey] = await db
     .select()
     .from(apiKeys)
-    .where(and(eq(apiKeys.key, key), eq(apiKeys.isActive, 1)))
+    .where(and(eq(apiKeys.key, key), eq(apiKeys.isActive, true)))
     .limit(1);
   
   if (!apiKey) {
@@ -89,7 +93,7 @@ export async function deactivateApiKey(id: number, userId: number, organizationI
     ? and(eq(apiKeys.id, id), eq(apiKeys.userId, userId), eq(apiKeys.organizationId, organizationId))
     : and(eq(apiKeys.id, id), eq(apiKeys.userId, userId));
 
-  await db.update(apiKeys).set({ isActive: 0 }).where(conditions);
+  await db.update(apiKeys).set({ isActive: false }).where(conditions);
 }
 
 /**
@@ -100,7 +104,7 @@ export async function activateApiKey(id: number, userId: number, organizationId?
     ? and(eq(apiKeys.id, id), eq(apiKeys.userId, userId), eq(apiKeys.organizationId, organizationId))
     : and(eq(apiKeys.id, id), eq(apiKeys.userId, userId));
 
-  await db.update(apiKeys).set({ isActive: 1 }).where(conditions);
+  await db.update(apiKeys).set({ isActive: true }).where(conditions);
 }
 
 /**
