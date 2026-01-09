@@ -46,7 +46,44 @@ export async function getUserByEmail(email: string) {
   }
 
   try {
-    const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
+    console.log("[Database] Searching for user with email:", email);
+    console.log("[Database] Email type:", typeof email);
+    console.log("[Database] Email length:", email.length);
+    
+    // Try case-insensitive search first
+    const result = await db.select().from(users).where(eq(users.email, email.toLowerCase().trim())).limit(1);
+    
+    console.log("[Database] Query result:", {
+      found: result.length > 0,
+      resultCount: result.length,
+      userId: result[0]?.id,
+      userEmail: result[0]?.email,
+      userEmailType: typeof result[0]?.email,
+      userEmailLength: result[0]?.email?.length,
+    });
+    
+    if (result.length === 0) {
+      // Try to find any user to see if query works
+      const allUsers = await db.select({ email: users.email }).from(users).limit(5);
+      console.log("[Database] Sample emails in database:", allUsers.map(u => u.email));
+      
+      // Try exact match with different case
+      const caseInsensitiveResult = await db
+        .select()
+        .from(users)
+        .where(sql`LOWER(${users.email}) = LOWER(${email.trim()})`)
+        .limit(1);
+      
+      console.log("[Database] Case-insensitive search result:", {
+        found: caseInsensitiveResult.length > 0,
+        userEmail: caseInsensitiveResult[0]?.email,
+      });
+      
+      if (caseInsensitiveResult.length > 0) {
+        return caseInsensitiveResult[0];
+      }
+    }
+    
     return result.length > 0 ? result[0] : undefined;
   } catch (error: any) {
     console.error("[Database] Failed to get user by email:", error);
