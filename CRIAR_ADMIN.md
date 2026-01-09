@@ -58,16 +58,18 @@ node -e "const bcrypt = require('bcryptjs'); bcrypt.hash('sua-senha', 10).then(h
      'admin@exemplo.com',  -- SUBSTITUA pelo seu email
      '$2a$10$SEU_HASH_AQUI',  -- SUBSTITUA pelo hash da senha gerado
      'Administrador',
-     'admin',
+     'admin',  -- IMPORTANTE: deve ser 'admin', não outro valor
      org.id,
      NOW(),
      NOW(),
      NOW()
    FROM org
    ON CONFLICT (email) DO UPDATE
-   SET role = 'admin',
-       password = EXCLUDED.password,
-       "updatedAt" = NOW();
+   SET 
+     role = 'admin',
+     password = EXCLUDED.password,
+     name = EXCLUDED.name,
+     "updatedAt" = NOW();
    ```
 
 ## Opção 3: Via Interface Web (Se já tiver um usuário)
